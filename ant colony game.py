@@ -49,6 +49,7 @@ class Ant(ABC):
     def __init__(self, colony):
         self.colony = colony
         self.health = 100
+        self.position = (0, 0)
 
     @abstractmethod
     def attack(self):
