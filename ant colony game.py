@@ -23,7 +23,6 @@ def generate_colony_name():
         "Vast",
         "Violent"
     }
-
     nouns = {
         "Colony",
         "Settlement",
@@ -39,10 +38,8 @@ def generate_colony_name():
         "Sanctuary",
         "Stronghold"
     }
-
     adjective = random.choice(list(adjectives))
     noun = random.choice(list(nouns))
-
     return f"{adjective} {noun}"
 
 class Ant(ABC):
@@ -71,9 +68,11 @@ class Ant(ABC):
     @abstractmethod
     def gather_resources(self):
         gathered_resources = 20
-        if random.random() < 0.3 and self.colony.game.total_resources >= gathered_resources:  # 30% chance to gather resources
+        # 30% chance to gather resources
+        if random.random() < 0.3 and self.colony.game.total_resources >= gathered_resources:  
             self.colony.resources += gathered_resources
-            self.colony.game.total_resources -= gathered_resources  # deplete total resources
+            # deplete total resources
+            self.colony.game.total_resources -= gathered_resources  
             
     def move(self, direction):
         new_position = self.position + direction
@@ -103,10 +102,11 @@ class WorkerAnt(Ant):
 
     def gather_resources(self):
         gathered_resources = 20
-        if random.random() < 0.3 and self.colony.game.total_resources >= gathered_resources:  # 30% chance to gather resources
+        # 30% chance to gather resources
+        if random.random() < 0.3 and self.colony.game.total_resources >= gathered_resources:
             self.colony.resources += gathered_resources
-            self.colony.game.total_resources -= gathered_resources  # deplete total resources
-
+            # deplete total resources
+            self.colony.game.total_resources -= gathered_resources  
 class SoldierAnt(Ant):
     def __init__(self, colony):
         super().__init__(colony)
@@ -189,6 +189,29 @@ class CaretakerAnt(Ant):
         # This method is empty because Caretaker ants do not move.
         pass
 
+class Cell:
+    def __init__(self):
+        self.resources = 0  # The amount of resources in the cell
+        self.enemy = None  # The enemy in the cell, if any
+
+    def has_resources(self):
+        return self.resources > 0
+
+    def get_resources(self):
+        return self.resources
+
+    def deplete_resources(self, amount):
+        self.resources = max(0, self.resources - amount)
+
+    def has_enemy(self):
+        return self.enemy is not None
+
+    def get_enemy(self):
+        return self.enemy
+
+    def set_enemy(self, enemy):
+        self.enemy = enemy
+
 class Colony:
     MAX_ALLIES = 3  # Maximum number of allies a colony can have
     def __init__(self, name, game):
@@ -197,7 +220,7 @@ class Colony:
         self.resources = 1000
         self.game = game
         self.alliances = []
-        self.attacked_by_this_turn = []  # New attribute to track attacks
+        self.attacked_by_this_turn = []
         self.ANT_CREATION_PROBABILITY = 1
 
     def is_allied_with(self, other_colony):
@@ -234,15 +257,17 @@ class Colony:
 
 class Game():
     def __init__(self, num_colonies):  # Add num_colonies as an argument
+        self.colonies = [self.create_colony(generate_colony_name()) for _ in range(num_colonies)]
+        self.map_width = 10  # Replace with your actual map width
+        self.map_height = 10  # Replace with your actual map height
+        self.map = [[Cell() for _ in range(self.map_width)] for _ in range(self.map_height)]
         self.MIN_COLONIES_FOR_ALLIANCES = num_colonies // 2  # Minimum number of colonies for alliances to be allowed
         self.ALLIANCE_BREAK_PROBABILITY = 0.20 # 0.05  # 5% chance to break an alliance each turn
         self.RESOURCE_THRESHOLD = 200  # Threshold for resource scarcity
         self.colonies = []
         self.turn = 0
         self.total_resources = 1000 * num_colonies  # new attribute for total resources
-        for _ in range(num_colonies):
-            self.create_colony(generate_colony_name())
-
+        
     def create_colony(self, name):
         new_colony = Colony(name, self)
         new_colony.create_ant() 
@@ -335,7 +360,7 @@ class Game():
         return random.choice(directions)
                     
     def is_valid_position(self, position):
-        return 0 <= position.x < self.map_width and 0 <= position.y < self.map_height and not self.map[position.y][position.x].is_obstacle
+        return 0 <= position[0] < self.map_width and 0 <= position[1] < self.map_height and not self.map[position[1]][position[0]].is_obstacle
 
     def remove_empty_colonies(self):
         self.colonies = [colony for colony in self.colonies if len(colony.population) > 0]
